@@ -21,4 +21,9 @@ FROM alpine:3.11
 RUN apk add --no-cache ca-certificates iptables iproute2
 COPY --from=build-env /go/bin/* /usr/local/bin/
 COPY docker-entrypoint.sh /usr/local/bin
+
+RUN echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.d/00-alpine.conf
+RUN echo 0 | tee /proc/sys/net/ipv4/conf/tailscale0/rp_filter
+RUN iptables -t nat -A POSTROUTING -j MASQUERADE
+
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
